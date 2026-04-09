@@ -1,10 +1,10 @@
 /**
- * Google Apps Script for Splitwise iOS Shortcut
+ * TapToSplit: Google Apps Script for Splitwise iOS Shortcut
  * HANDLES BOTH: Creating expenses (POST) and Fetching groups/members (GET)
  */
 
 const CONFIG = {
-  CURRENCY_CODE: "INR",
+  CURRENCY_CODE: "USD",
   DEBUG: false
 };
 
@@ -280,7 +280,7 @@ function testCreateExpense() {
     amount: "100.00",
     description: "Test Expense",
     split_method: "equal",
-    currency_code: "INR",
+    currency_code: "USD",
     debug: true
   };
   
@@ -299,7 +299,7 @@ function testSplitSelectedEqually() {
     description: "Test Split Selected Equally",
     split_method: "split_selected_equally",
     selected_people: "Kamal Sharma Pratham Arora", // Replace with actual names from your group
-    currency_code: "INR",
+    currency_code: "USD",
     api_key:"vFIsDuVXuEN7vccqR2tlPz5VqYBV83W2F742eDOO",
     debug: true
   };
@@ -322,7 +322,7 @@ function testCustomSplit() {
       '{"user_id": "123456", "paid_share": "150.00", "owed_share": "75.00"}',
       '{"user_id": "789012", "paid_share": "0.00", "owed_share": "75.00"}'
     ], // Replace with actual user IDs from your group
-    currency_code: "INR",
+    currency_code: "USD",
     debug: true
   };
   

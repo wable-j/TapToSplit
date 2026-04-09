@@ -3,7 +3,7 @@
 import { axios } from "@pipedream/platform"
 
 export default defineComponent({
-  name: "Create Splitwise Expense from iOS Shortcuts",
+  name: "TapToSplit: Create Splitwise Expense from iOS Shortcuts",
   description: "Process expense data from iOS Shortcuts and create expense in Splitwise group with automatic group lookup and user detection",
   type: "action",
   props: {
@@ -47,7 +47,7 @@ export default defineComponent({
       type: "string",
       label: "Currency Code",
       description: "Currency code (e.g., USD, EUR, INR)",
-      default: "INR",
+      default: "USD",
       optional: true,
     },
     user_splits: {
