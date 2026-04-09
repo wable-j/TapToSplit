@@ -39,7 +39,7 @@ B -->|Confirmation| A
 
 ### 1. Deploy the Google Apps Script
 1. Go to [script.google.com](https://script.google.com/).
-2. Create a new project and paste the entire contents of `google-apps-script.gs`.
+2. Create a new project and paste the entire contents of `secure_tap_to_split.gs`.
 3. Click **Deploy** -> **New deployment**.
 4. Choose **Web app** as the deployment type.
 5. Set "Execute as: **Me**" and "Who has access: **Anyone**".
@@ -63,8 +63,9 @@ B -->|Confirmation| A
 
 | File | Description |
 |------|-------------|
-| 📜 `google-apps-script.gs` | **Active Core:** The main Web App script to deploy to Google Apps Script. |
-| 🗑️ `process_splitwise_expense.js` | **Deprecated:** Old component originally used for Pipedream. Kept for historical reference only. |
+| 🔒 `secure_tap_to_split.gs` | **Active Core:** The main Web App script. The recommended, highly-secure POST-only script! |
+| 📜 `google-apps-script.gs` | **Legacy Core:** The older functionality version mixing GET and POST methods. |
+| 🧪 `demo_fetch_splitwise.js`| **Demo:** Standalone Node.js script to practice learning the raw Splitwise API. |
 
 ---
 
