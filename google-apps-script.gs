@@ -11,57 +11,16 @@ const CONFIG = {
 // Note: API_KEY is now passed by each user in their request
 
 // ==========================================
-// 1. NEW: doGet Function (For fetching data)
+// 1. DEPRECATED: doGet Function
 // ==========================================
 function doGet(e) {
-  try {
-    // Validate API key is provided
-    const apiKey = e.parameter.api_key;
-    if (!apiKey) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ error: "API key is required. Pass it as ?api_key=YOUR_KEY" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    // SCENARIO A: Fetch members for a specific group (e.g., ?group_name=Goa&api_key=YOUR_KEY)
-    if (e.parameter.group_name) {
-      const groupName = e.parameter.group_name;
-      const group = findGroupByName(groupName, false, apiKey); 
-      
-      // Format members for the Shortcut list
-      const members = group.members.map(u => {
-        return u.last_name ? `${u.first_name} ${u.last_name}` : u.first_name;
-      });
-
-      return ContentService
-        .createTextOutput(JSON.stringify({ members: members }))
-        .setMimeType(ContentService.MimeType.JSON);
-    } 
-    
-    // SCENARIO B: Fetch all available groups (Default when no params)
-    else {
-      const groupsUrl = "https://secure.splitwise.com/api/v3.0/get_groups";
-      const response = makeAuthenticatedRequest('GET', groupsUrl, null, false, apiKey);
-      
-      // Filter out empty groups and just get names
-      const activeGroups = response.groups
-        .filter(g => g.id !== 0 && g.members.length > 0)
-        .map(g => g.name);
-
-      return ContentService
-        .createTextOutput(JSON.stringify({ groups: activeGroups }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-  } catch (error) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: error.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  return ContentService
+    .createTextOutput(JSON.stringify({ error: "GET requests are disabled for security (API Key exposure). Please use POST requests with JSON body." }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // ==========================================
-// 2. EXISTING: doPost Function (For creating expenses)
+// 2. UNIFIED: doPost Function (Routing)
 // ==========================================
 function doPost(e) {
   try {
@@ -76,24 +35,62 @@ function doPost(e) {
     }
     
     if (CONFIG.DEBUG) console.log('Received request:', JSON.stringify(requestData));
+
+    const action = requestData.action || "create_expense"; // Default to create expense for backwards compatibility
     
-    // Clean extraction for generic Shortcut
-    const expenseParams = {
-      group_name: requestData.Group || requestData.group_name,
-      amount: requestData.Amount || requestData.amount,
-      description: requestData.Description || requestData.description,
-      split_method: requestData['Split Method'] || requestData.split_method || 'equal',
-      selected_people: requestData.selected_people,
-      currency_code: CONFIG.CURRENCY_CODE,
-      debug: CONFIG.DEBUG,
-      api_key: apiKey
-    };
+    // ROUTE: Fetch members for a specific group
+    if (action === "fetch_members") {
+      if (!requestData.group_name && !requestData.Group) {
+        throw new Error("group_name is required for fetch_members action");
+      }
+      const groupName = requestData.group_name || requestData.Group;
+      const group = findGroupByName(groupName, false, apiKey); 
+      
+      const members = group.members.map(u => {
+        return u.last_name ? `${u.first_name} ${u.last_name}` : u.first_name;
+      });
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ members: members }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     
-    const result = createSplitwiseExpense(expenseParams);
+    // ROUTE: Fetch all available groups
+    else if (action === "fetch_groups") {
+      const groupsUrl = "https://secure.splitwise.com/api/v3.0/get_groups";
+      const response = makeAuthenticatedRequest('GET', groupsUrl, null, false, apiKey);
+      
+      const activeGroups = response.groups
+        .filter(g => g.id !== 0 && g.members.length > 0)
+        .map(g => g.name);
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ groups: activeGroups }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     
-    return ContentService
-      .createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    // ROUTE: Create Expense
+    else if (action === "create_expense") {
+      // Clean extraction for generic Shortcut
+      const expenseParams = {
+        group_name: requestData.Group || requestData.group_name,
+        amount: requestData.Amount || requestData.amount,
+        description: requestData.Description || requestData.description,
+        split_method: requestData['Split Method'] || requestData.split_method || 'equal',
+        selected_people: requestData.selected_people,
+        currency_code: CONFIG.CURRENCY_CODE,
+        debug: CONFIG.DEBUG,
+        api_key: apiKey
+      };
+      
+      const result = createSplitwiseExpense(expenseParams);
+      
+      return ContentService
+        .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+    } else {
+       throw new Error(`Unknown action: ${action}`);
+    }
       
   } catch (error) {
     console.error('Error in doPost:', error);

@@ -47,11 +47,12 @@ B -->|Confirmation| A
 
 ### 2. Configure Your iOS Shortcut
 1. In your iOS Shortcut, set up a "Get contents of URL" action.
-2. Method: `POST` (for adding expenses) or `GET` (for fetching active groups/members).
+2. Method: **Always use `POST`** (for both adding expenses and fetching data).
 3. URL: Paste your Google Apps Script Web App URL.
 4. Add your payload in the **Request Body (JSON)**:
     - `api_key`: Your Splitwise API key
-    - `group_name`: Name of the Splitwise group
+    - `action` *(optional)*: Use `fetch_groups`, `fetch_members`, or `create_expense`. (Defaults to creating an expense if empty).
+    - `group_name`: Name of the Splitwise group (required for fetching members or creating an expense)
     - `amount`: The expense cost
     - `description`: What the expense was for
     - `split_method`: `equal` or `split_selected_equally`
